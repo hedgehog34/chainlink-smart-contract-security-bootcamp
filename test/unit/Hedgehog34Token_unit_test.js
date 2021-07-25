@@ -21,4 +21,29 @@ skip.if(!developmentChains.includes(network.name)).
       console.log("Token Total Supply Value: ", new web3.utils.BN(result._hex).toString())
       expect(new web3.utils.BN(result._hex).toString()).to.be.a.bignumber.that.is.greaterThan(new web3.utils.BN(0))
     })
+
+    it('it should adjust accounts balances accordingly after transferring value', async () => {
+      //first get current address information
+      const accounts = await hre.ethers.getSigners();
+      const account = await ethers.getSigners();
+      const sender = account[0].address;
+      const receiver = account[1].address;
+
+      let currentSenderBalance = await erc20.balanceOf(sender);
+      let currentReceiverBalance = await erc20.balanceOf(receiver);
+      console.log("Current sender token balance: ", currentSenderBalance.toString());
+      console.log("Current receiver token balance: ", currentReceiverBalance.toString());
+
+      //do the transfer of 100 tokens from sender to receiver
+      let transfer = await erc20.transfer(receiver,100)
+
+      //check both accounts
+      let newSenderBalance = await erc20.balanceOf(sender);
+      let newReceiverBalance = await erc20.balanceOf(receiver);
+      console.log("New sender token balance: ", newSenderBalance.toString());
+      console.log("New receiver token balance: ", newReceiverBalance.toString());
+
+      //Run the assertion
+      expect(newSenderBalance.toString()).to.be.a.bignumber.that.is.lessThan(currentSenderBalance.toString());
+    })
   })
